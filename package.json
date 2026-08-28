@@ -1,0 +1,44 @@
+{
+  "name": "n8n-nodes-monapay",
+  "version": "0.1.0",
+  "description": "n8n community nodes cho MONA Pay",
+  "license": "MIT",
+  "homepage": "https://monapay.vn/docs",
+  "keywords": [
+    "n8n-community-node-package",
+    "monapay",
+    "vietqr",
+    "webhook",
+    "vietnam"
+  ],
+  "main": "index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "n8n-node-dev build",
+    "dev": "n8n-node-dev build --watch",
+    "lint": "eslint nodes credentials --ext .ts",
+    "prepublishOnly": "npm run build"
+  },
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/MonaPayApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/MonaPay/MonaPay.node.js",
+      "dist/nodes/MonaPay/MonaPayTrigger.node.js"
+    ]
+  },
+  "peerDependencies": {
+    "n8n-workflow": ">=1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "eslint": "^9.0.0",
+    "n8n-node-dev": "^0.15.0",
+    "n8n-workflow": "^1.0.0",
+    "typescript": "^5.6.0"
+  }
+}
