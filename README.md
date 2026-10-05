@@ -1,37 +1,76 @@
-# n8n nodes cho MONA Pay
+# n8n-nodes-monapay
 
-Community package gồm:
+n8n community nodes for MONA Pay: create VietQR codes, look up transactions and receive verified MONA Pay webhooks inside n8n workflows.
 
-- `MONA Pay`: tạo VietQR, tra giao dịch theo VA, lấy danh sách webhook.
-- `MONA Pay Trigger`: nhận JSON webhook và chỉ phát event khi HMAC-SHA256 trên raw body hợp lệ, timestamp lệch không quá 300 giây.
-- Credential `MONA Pay API`: username, password, client secret, webhook secret và base URL.
+The package contains:
 
-> **Dùng cho quy mô nhỏ/test; quy mô lớn tụi em khuyên viết lớp nối riêng (xem connectors/) vì automation no-code chập chờn, 1 node lỗi là mất đơn**.
+- **MONA Pay** node with three operations: create a VietQR (`Tạo QR`), list transactions of a virtual account (`Tra giao dịch`) and list webhook configs (`Danh sách webhook`).
+- **MONA Pay Trigger** node: receives webhook JSON and emits an item only when the HMAC-SHA256 signature over the raw body is valid and the timestamp is within 300 seconds.
+- **MONA Pay API** credential.
 
-Luôn chạy thêm job đối soát qua API giao dịch. Trong hệ thống đích, đặt unique constraint trên `transaction_code` và chỉ chốt đơn sau khi khớp mã đơn lẫn số tiền.
+## Install
 
-## Phát triển local
-
-Scaffold không kèm dependency đã cài. Trên máy phát triển có mạng/package cache phù hợp:
+The package is not yet on npm. Build it from source and load it into your n8n instance as a custom node:
 
 ```bash
-cd devtools/n8n-nodes-monapay
+git clone https://github.com/mona-software/n8n-nodes-monapay.git
+cd n8n-nodes-monapay
 npm install
-npm run build
+npm run build   # compiles with tsc into dist/
 ```
 
-Link `dist/` vào instance n8n test theo hướng dẫn community nodes của phiên bản n8n đang dùng. Cấu hình credential:
+Then link or copy the package into your n8n custom nodes directory (for example `~/.n8n/custom`) as described in the n8n documentation for your version, and restart n8n.
 
-1. Username/password dùng để lấy Bearer token.
-2. Client Secret dùng cho `Tạo QR`; GET giao dịch/webhook không cần secret này.
-3. Webhook Secret phải đúng `secret_key` của cấu hình webhook `HMAC_SHA256`; không dùng Client Secret thay thế.
+## Configuration
 
-Trigger cố ý không ký lại từ object JSON đã parse. Runtime n8n/reverse proxy phải giữ `request.rawBody`; nếu thiếu, node trả HTTP 400 để tránh xác thực sai âm thầm. Endpoint thành công trả HTTP 200, đủ điều kiện ACK của MONA Pay.
+Create a **MONA Pay API** credential:
 
-## Publish
+| Field | Required | Meaning |
+| --- | --- | --- |
+| Username | yes | MONA Pay username, used to obtain the Bearer token |
+| Password | yes | MONA Pay password |
+| Client Secret | for write actions | Sent as `X-Client-Secret` when creating a QR code; not needed for listing transactions or webhooks |
+| Webhook Secret | for the trigger | Must match the `secret_key` of an `HMAC_SHA256` webhook config; this is not the Client Secret |
+| Base URL | yes | Defaults to `https://api.monapay.vn` |
 
-Mon cần test trên một instance n8n tương thích, kiểm `dist`, đăng nhập npm organization chính thức rồi publish `n8n-nodes-monapay`. Chưa publish package từ scaffold này.
+## Usage
 
-Tài liệu: https://monapay.vn/docs · llms: https://monapay.vn/llms.txt · Hotline 1900 636 648 · info@themona.global
+### MONA Pay node
 
-**MONA Pay thuộc bộ MONA Cloud của The MONA Group.**
+- **Tạo QR** (create QR): needs Owner Number, Owner Type (`PER` or `ORG`), Merchant ID, Terminal ID, Order ID, Virtual Account Prefix, Beneficiary Name and Amount; Description is optional.
+- **Tra giao dịch** (list transactions): needs Virtual Account Number, with Page and Limit.
+- **Danh sách webhook** (list webhooks): no parameters.
+
+### MONA Pay Trigger
+
+Point a MONA Pay webhook config that uses auth type `HMAC_SHA256` at the trigger's webhook URL (path `monapay`, method POST).
+
+The trigger never re-signs a parsed JSON object. n8n (and any reverse proxy in front of it) must keep the original raw body; if it is missing the node returns HTTP 400 instead of silently accepting the request. Responses:
+
+| Status | Reason |
+| --- | --- |
+| 200 | Valid webhook; the payload is passed to the workflow |
+| 400 | `raw_body_required` or `invalid_json` |
+| 401 | `invalid_signature_or_timestamp` |
+| 500 | `webhook_secret_not_configured` |
+
+### Recommendations
+
+- Also run a scheduled reconciliation job against the transactions API, in case a workflow run fails.
+- In the target system, put a unique constraint on `transaction_code` and mark an order as paid only after both the order code and the amount match.
+
+## Development
+
+```bash
+npm install
+npm run build   # one-off build
+npm run dev     # tsc --watch
+```
+
+Documentation: https://monapay.vn/docs
+
+## License
+
+MIT
+
+**MONA Pay is part of MONA Cloud by The MONA Group.**

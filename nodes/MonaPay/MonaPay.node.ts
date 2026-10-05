@@ -5,7 +5,7 @@ import type {
   INodeType,
   INodeTypeDescription,
 } from 'n8n-workflow';
-import { NodeConnectionType, NodeOperationError } from 'n8n-workflow';
+import { NodeOperationError } from 'n8n-workflow';
 import { monaPayRequest } from './GenericFunctions';
 
 export class MonaPay implements INodeType {
@@ -18,8 +18,8 @@ export class MonaPay implements INodeType {
     subtitle: '={{$parameter["operation"]}}',
     description: 'Tạo VietQR và tra dữ liệu MONA Pay',
     defaults: { name: 'MONA Pay' },
-    inputs: [NodeConnectionType.Main],
-    outputs: [NodeConnectionType.Main],
+    inputs: ['main'],
+    outputs: ['main'],
     credentials: [{ name: 'monaPayApi', required: true }],
     properties: [
       {

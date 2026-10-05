@@ -6,7 +6,6 @@ import type {
   IWebhookFunctions,
   IWebhookResponseData,
 } from 'n8n-workflow';
-import { NodeConnectionType } from 'n8n-workflow';
 
 type RequestWithRawBody = {
   rawBody?: Buffer | Uint8Array | string;
@@ -45,7 +44,7 @@ export class MonaPayTrigger implements INodeType {
     description: 'Nhận và xác thực webhook giao dịch MONA Pay',
     defaults: { name: 'MONA Pay Trigger' },
     inputs: [],
-    outputs: [NodeConnectionType.Main],
+    outputs: ['main'],
     credentials: [{ name: 'monaPayApi', required: true }],
     webhooks: [
       {
