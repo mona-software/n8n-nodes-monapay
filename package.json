@@ -40,5 +40,10 @@
     "n8n-node-dev": "^0.15.0",
     "n8n-workflow": "^1.0.0",
     "typescript": "^5.6.0"
+  },
+  "author": "MONA Software",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mona-software/n8n-nodes-monapay.git"
   }
 }

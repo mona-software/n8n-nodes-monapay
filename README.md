@@ -33,3 +33,5 @@ Trigger cố ý không ký lại từ object JSON đã parse. Runtime n8n/revers
 Mon cần test trên một instance n8n tương thích, kiểm `dist`, đăng nhập npm organization chính thức rồi publish `n8n-nodes-monapay`. Chưa publish package từ scaffold này.
 
 Tài liệu: https://monapay.vn/docs · llms: https://monapay.vn/llms.txt · Hotline 1900 636 648 · info@themona.global
+
+**MONA Pay thuộc bộ MONA Cloud của The MONA Group.**
